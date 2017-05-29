@@ -1,0 +1,25 @@
+{
+  "name": "psycho-backend",
+  "version": "1.0.0",
+  "description": "",
+  "main": "app.js",
+  "dependencies": {
+    "body-parser": "^1.17.2",
+    "dotenv": "^4.0.0",
+    "express": "^4.15.3",
+    "glob": "^7.1.2",
+    "jsend": "^1.0.2",
+    "mysql": "^2.13.0",
+    "nodemailer": "^4.0.1",
+    "nodemailer-smtp-transport": "^2.7.4",
+    "sequelize": "^3.30.4",
+    "socket.io": "^2.0.1",
+    "trycatch": "^1.5.21"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC"
+}
