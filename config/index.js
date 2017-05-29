@@ -1,13 +1,13 @@
 // Select settings based on NODE_ENV (development or production)
+let config = {};
 switch (process.env.NODE_ENV) {
-
   case 'development':
-    module.exports = {
+    config = {
       'connectionString': 'mysql://' + process.env.DB_DEV_USER + ':' + process.env.DB_DEV_PASS + '@' + process.env.DB_DEV_HOST + ':3306/' + process.env.DB_DEV_NAME,
-      'dbuser':process.env.DB_DEV_USER,
-      'dbname':process.env.DB_DEV_NAME,
-      'dbpass':process.env.DB_DEV_PASS,
-      'dbhost':process.env.DB_DEV_HOST,
+      'dbuser': process.env.DB_DEV_USER,
+      'dbname': process.env.DB_DEV_NAME,
+      'dbpass': process.env.DB_DEV_PASS,
+      'dbhost': process.env.DB_DEV_HOST,
       'dbdialect': 'mysql',
       'dblogging': false,
       'secret': 'g0jewpddfadsakjlknvlkjlkwj',
@@ -24,12 +24,12 @@ switch (process.env.NODE_ENV) {
     };
     break;
   case 'production':
-    module.exports = {
+    config = {
       'connectionString': 'mysql://' + process.env.DB_PROD_USER + ':' + process.env.DB_PROD_PASS + '@' + process.env.DB_PROD_HOST + ':3306/' + process.env.DB_PROD_NAME,
-      'dbuser':process.env.DB_PROD_USER,
-      'dbname':process.env.DB_PROD_NAME,
-      'dbpass':process.env.DB_PROD_PASS,
-      'dbhost':process.env.DB_PROD_HOST,
+      'dbuser': process.env.DB_PROD_USER,
+      'dbname': process.env.DB_PROD_NAME,
+      'dbpass': process.env.DB_PROD_PASS,
+      'dbhost': process.env.DB_PROD_HOST,
       'dbdialect': 'mysql',
       'dblogging': false,
       'secret': 'fh8f08hew09wj2223gfsddve',
@@ -46,12 +46,12 @@ switch (process.env.NODE_ENV) {
     };
     break;
   default:
-    module.exports = {
+    config = {
       'connectionString': 'postgres://' + process.env.DB_DEV_USER + ':' + process.env.DB_DEV_PASS + '@' + process.env.DB_DEV_HOST + ':5432/' + process.env.DB_DEV_NAME,
-      'dbuser':process.env.DB_DEV_USER,
-      'dbname':process.env.DB_DEV_NAME,
-      'dbpass':process.env.DB_DEV_PASS,
-      'dbhost':process.env.DB_DEV_HOST,
+      'dbuser': process.env.DB_DEV_USER,
+      'dbname': process.env.DB_DEV_NAME,
+      'dbpass': process.env.DB_DEV_PASS,
+      'dbhost': process.env.DB_DEV_HOST,
       'dbdialect': 'postgres',
       'dblogging': false,
       'secret': '98je09kj34aowqoie',
@@ -67,3 +67,26 @@ switch (process.env.NODE_ENV) {
       }
     }
 }
+
+// Adding static users to .env files.
+// The env file should have a USER_LOGIN key (for example USER_ADMIN or USER_JOHN) associated with a BCRYPT encrypted password
+
+config.users = [];
+Object.keys(process.env).some((k) => {
+  if (~k.indexOf("USER_")) {
+    try {
+      let login = k.split('_')[1].toLowerCase();
+      if (login.length<1) {
+        throw new Error('invalid user '+k+' in .env file');
+      }
+      config.users.push({
+        login: login,
+        password: process.env[k]
+      })
+    } catch (error) {
+      console.warn(error);
+    }
+  }
+})
+console.log(config.users);
+module.exports = config;
