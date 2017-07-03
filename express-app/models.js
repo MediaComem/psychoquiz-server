@@ -4,61 +4,79 @@
 
 let path = require('path');
 let Sequelize = require('sequelize');
+let glob = require('glob-promise');
 let basename = path.basename(module.filename);
 let db = {};
-var glob = require("glob")
 
-// options is optional
+const forceSync = true; // be careful with this value set to true, it will empty the database when editing the schemas.
 
-
-module.exports = function (config) {
-  var sequelize = new Sequelize(
-    config.dbname,
-    config.dbuser,
-    config.dbpass, {
-      host: config.dbhost,
-      dialect: config.dbdialect,
-      logging: config.dblogging,
+let createConfig = state => {
+  state.sequelize = new Sequelize(
+    state.config.dbname,
+    state.config.dbuser,
+    state.config.dbpass, {
+      host: state.config.dbhost,
+      dialect: state.config.dbdialect,
+      logging: state.config.dblogging,
       pool: false
 
     });
-
-  return new Promise(function (resolve, reject) {
-    let loadFiles = _ => {
-      glob(__dirname + "/**/*.model.js", (er, files) => {
-        
-        generateModels(files);
-
-        Object.keys(db).forEach(function (modelName) {
-          //console.log(modelName);
-          if (db[modelName].associate) {
-            db[modelName].associate(db);
-          }
-        });
-
-        // Sync and return DB
-        return sequelize.sync({ force: true }).then(() => {
-          db.sequelize = sequelize;
-          db.Sequelize = Sequelize;
-          resolve(db);
-        })
-      })
-    }
-
-    let generateModels = (files) => {
-      files.forEach(function (file) {
-
-        let DataTypes = Sequelize;
-        let model = sequelize['import'](file);
-        db[model.name] = model;
-
-      });
-    }
-
-    sequelize.authenticate()
-      .then(() => {
-        loadFiles()
-      });
-
-  });
+  return state;
 }
+
+
+let globFiles = state => {
+  return glob(__dirname + "/**/*.model.js")
+    .then(contents => {
+      state.files = contents;
+      return state;
+    })
+}
+
+
+let generateModels = state => {
+  state.files.forEach(function (f) {
+    let DataTypes = Sequelize;
+    let model = state.sequelize['import'](f);
+    db[model.name] = model;
+  });
+  return state;
+}
+
+
+let associateDb = state => {
+  Object.keys(db).forEach(function (modelName) {
+    if (db[modelName].associate) {
+      db[modelName].associate(db);
+    }
+  });
+  return state;
+};
+
+
+let syncSeq = state => {
+  state.sequelize.sync({
+    force: forceSync
+  });
+  return state;
+};
+
+module.exports = config => {
+  return new Promise((resolve, reject) => {
+    // All the data passes through `state`
+    const state = {
+      config: config
+    };
+    Promise.resolve(state)
+      .then(createConfig)
+      .then(globFiles)
+      .then(generateModels)
+      .then(associateDb)
+      .then(syncSeq)
+      .then(state => {
+        db.sequelize = state.sequelize;
+        db.Sequelize = Sequelize;
+        resolve(db);
+      });
+  });
+};;
