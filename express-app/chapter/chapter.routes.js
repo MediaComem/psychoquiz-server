@@ -25,15 +25,23 @@ let getChaptersRoute = (rq, rs) => {
  * Get a specific chapter
  */
 
-let getChapterById = _ => {
-  return req.app.models.Chapter.findById(req.params.id);
+let findChapterById = _ => {
+    return req.app.models.Chapter.findById(req.params.id);
+}
+
+let testChapter = chapter => {
+  if (!chapter) {
+    throw new Error('Chapter not found');
+  }
+  return chapter;
 }
 
 let getChapterByIdRoute = (rq, rs) => {
   req = rq;
   res = rs;
   return Promise.resolve()
-    .then(getChapterById)
+    .then(findChapterById)
+    .then(testChapter)
     .then(success)
     .catch(error);
 }
@@ -60,9 +68,6 @@ let createChapterRoute = (rq, rs) => {
  * Update a specific chapter
  */
 let updateChapter = chapter => {
-  if (!chapter) {
-    throw new Error('Chapter not found');
-  }
   chapter.intro = req.body.intro || chapter.intro;
   chapter.imgUrl = req.body.imgUrl || chapter.imgUrl;
   return chapter.save();
@@ -72,7 +77,8 @@ let updateChapterRoute = (rq, rs) => {
   req = rq;
   res = rs;
   return Promise.resolve()
-    .then(getChapterById)
+    .then(findChapterById)
+    .then(testChapter)
     .then(updateChapter)
     .then(success)
     .catch(error);
@@ -84,9 +90,6 @@ let updateChapterRoute = (rq, rs) => {
  */
 
 let deleteChapter = chapter => {
-  if (!chapter) {
-    throw new Error('Chapter not found');
-  }
   return chapter.destroy();
 }
 
@@ -94,7 +97,8 @@ let deleteChapterRoute = (rq, rs) => {
   req = rq;
   res = rs;
   return Promise.resolve()
-    .then(getChapterById)
+    .then(findChapterById)
+    .then(testChapter)
     .then(deleteChapter)
     .then(success)
     .catch(error);
@@ -108,6 +112,7 @@ let deleteChapterRoute = (rq, rs) => {
 module.exports = function (app, router) {
   router.get('/api/chapters', getChaptersRoute);
   router.post('/api/chapters', createChapterRoute);
-  router.get('/api/chapters/:id', updateChapterRoute);
+  router.get('/api/chapters/:id', getChapterByIdRoute);
   router.put('/api/chapters/:id', updateChapterRoute);
+  router.delete('/api/chapters/:id', deleteChapterRoute);
 }
