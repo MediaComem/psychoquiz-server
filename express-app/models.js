@@ -8,7 +8,7 @@ let glob = require('glob-promise');
 let basename = path.basename(module.filename);
 let db = {};
 
-const forceSync = true; // be careful with this value set to true, it will empty the database when editing the schemas.
+const forceSync = false; // be careful with this value set to true, it will empty the database when editing the schemas.
 
 let createConfig = state => {
   state.sequelize = new Sequelize(
@@ -79,4 +79,4 @@ module.exports = config => {
         resolve(db);
       });
   });
-};;
+};
