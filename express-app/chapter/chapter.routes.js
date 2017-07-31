@@ -14,7 +14,7 @@ let getChapters = _ => {
 
 let getChaptersRoute = (rq, rs) => {
   req = rq;
-  res = rs; // closures \o/
+  res = rs;
   return Promise.resolve()
     .then(getChapters)
     .then(success)
@@ -26,7 +26,14 @@ let getChaptersRoute = (rq, rs) => {
  */
 
 let findChapterById = _ => {
-    return req.app.models.Chapter.findById(req.params.id);
+    return req.app.models.Chapter.find({
+      where: {
+        id: req.params.id
+      },
+      include: [{
+        model: req.app.models.Statement
+      }]
+    });      
 }
 
 let testChapter = chapter => {

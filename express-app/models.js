@@ -8,7 +8,11 @@ let glob = require('glob-promise');
 let basename = path.basename(module.filename);
 let db = {};
 
-const forceSync = false; // be careful with this value set to true, it will empty the database when editing the schemas.
+// Using sync to avoid migrations. The database is synchronised with the actual models in the code.
+// be careful with this value set to true, it will recreate the database
+// when editing the schemas, and therefore removing all the data.
+const forceSync = false; 
+
 
 let createConfig = state => {
   state.sequelize = new Sequelize(

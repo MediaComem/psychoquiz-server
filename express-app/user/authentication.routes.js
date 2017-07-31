@@ -1,7 +1,7 @@
 'use strict';
 
 let bcrypt = require('bcrypt');
-let jwt = require('jsonwebtoken');
+let jsonwebtoken = require('jsonwebtoken');
 
 let req, res;
 let error = error => res.jsend.error(error);
@@ -66,7 +66,7 @@ let testPassword = user => {
 
 let generateToken = user => {
     return {
-        token: jwt.sign({
+        token: jsonwebtoken.sign({
             email: user.email,
             id: user.id
         }, key)

@@ -4,8 +4,7 @@ module.exports = function (sequelize, DataTypes) {
 
   // Define fields
   let fields = {
-    intro: DataTypes.STRING,
-    imgUrl: DataTypes.STRING
+    answer: DataTypes.BOOLEAN
   };
   // Define Model
   let Answer = sequelize.define("Answer", fields, {

@@ -88,5 +88,4 @@ Object.keys(process.env).some((k) => {
     }
   }
 })
-console.log(config.users);
 module.exports = config;

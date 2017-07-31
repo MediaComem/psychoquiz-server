@@ -5,7 +5,8 @@ module.exports = function (sequelize, DataTypes) {
   // Define fields
   let fields = {
     intro: DataTypes.STRING,
-    imgUrl: DataTypes.STRING
+    imgUrl: DataTypes.STRING,
+    number: DataTypes.INTEGER
   };
   // Define Model
   let Chapter = sequelize.define("Chapter", fields, {

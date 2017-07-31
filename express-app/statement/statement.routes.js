@@ -51,7 +51,7 @@ let getStatementByIdRoute = (rq, rs) => {
  */   
 
 let findChapterById = _ => {
-  return req.app.models.Chapter.findById(req.body.chapterId);
+  return req.app.models.Chapter.findById(req.body.ChapterId);
 }
 
 let testChapter = chapter => {
