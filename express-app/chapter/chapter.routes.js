@@ -63,7 +63,9 @@ let createChapterRoute = (rq, rs) => {
   res = rs;
   let newChapter = req.app.models.Chapter.build({
     intro: req.body.intro,
-    imgUrl: req.body.imgUrl || ''
+    imgUrl: req.body.imgUrl || '',
+    title: req.body.title,
+    number: req.body.number
   });
   return Promise.resolve()
     .then(_ => newChapter.save())

@@ -4,6 +4,7 @@ module.exports = function (sequelize, DataTypes) {
 
   // Define fields
   let fields = {
+    title: DataTypes.STRING,
     intro: DataTypes.STRING,
     imgUrl: DataTypes.STRING,
     number: DataTypes.INTEGER

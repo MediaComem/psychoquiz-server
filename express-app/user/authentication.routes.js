@@ -86,8 +86,18 @@ let loginRoute = (rq, rs) => {
         .catch(error)
 }
 
+/*let checkUserRoute = (rq, rs) => {
+    req = rq;
+    res = rs;
+    return Promise.resolve()
+        .then() // TODO
+        .then(success)
+        .catch(error)
+}*/
+
 
 module.exports = function (app, router) {
     router.post('/api/auth/login', loginRoute);
     router.post('/api/auth/register', registerRoute);
+   //router.get('/api/auth/user', checkUserRoute);
 }
