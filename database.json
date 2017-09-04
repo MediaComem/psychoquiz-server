@@ -9,6 +9,6 @@
   "production": {
     "driver": "mysql",
     "user": "root",
-    "database": "myapp"
+    "database": "jesuistonpere"
   }
 }
