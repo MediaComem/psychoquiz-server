@@ -26,14 +26,14 @@ let getChaptersRoute = (rq, rs) => {
  */
 
 let findChapterById = _ => {
-    return req.app.models.Chapter.find({
-      where: {
-        id: req.params.id
-      },
-      include: [{
-        model: req.app.models.Statement
-      }]
-    });      
+  return req.app.models.Chapter.find({
+    where: {
+      id: req.params.id
+    },
+    include: [{
+      model: req.app.models.Statement
+    }]
+  });
 }
 
 let testChapter = chapter => {
@@ -114,6 +114,51 @@ let deleteChapterRoute = (rq, rs) => {
 }
 
 
+let findParticipation = token => {
+  return req.app.models.Participation.find({
+    where: {
+      token: token
+    }
+  });
+}
+
+let answeredChapters = participation => {
+  if (!participation) {
+    throw new Error('No participation with this token');
+
+  }
+  return participation.getChapters();
+}
+
+let inverseChapters = chapters => {
+  return req.app.models.Chapter.findAll()
+    .then(allChapters => {
+      return allChapters.filter(el => {
+        return chapters.indexOf(el) < 0;
+      });
+    });
+}
+
+let randomChapter = chapters => {
+  return chapters[Math.floor(Math.random() * chapters.length)];
+}
+
+let getRandomChapterRoute = (rq, rs) => {
+  req = rq;
+  res = rs;
+  const token = req.query.pt;
+  if (!token) {
+    throw new Error('Invalid token');
+  }
+  return Promise.resolve(token)
+    .then(findParticipation)
+    .then(answeredChapters)
+    .then(inverseChapters)
+    .then(randomChapter)
+    .then(success)
+    .catch(error)
+}
+
 /**
  *  Route definitions
  */
@@ -121,6 +166,7 @@ let deleteChapterRoute = (rq, rs) => {
 module.exports = function (app, router) {
   router.get('/api/chapters', getChaptersRoute);
   router.post('/api/chapters', createChapterRoute);
+  router.get('/api/chapters/random', getRandomChapterRoute);
   router.get('/api/chapters/:id', getChapterByIdRoute);
   router.put('/api/chapters/:id', updateChapterRoute);
   router.delete('/api/chapters/:id', deleteChapterRoute);

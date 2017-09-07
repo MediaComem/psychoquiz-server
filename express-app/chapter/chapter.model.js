@@ -14,6 +14,7 @@ module.exports = function (sequelize, DataTypes) {
     classMethods: {
       associate: function (models) {
         Chapter.hasMany(models.Statement);
+        Chapter.belongsToMany(models.Participation, { through: 'ChaptersDone' });
       }
     }
   });

@@ -49,11 +49,11 @@ let getAllParticipationsRoute = (rq, rs) => {
 
 
 let createParticipation = _ => {
-    let newParticipation = req.app.models.Participation.build({
-        token: req.body.token
-    });
+    let newParticipation = req.app.models.Participation.build();
     return newParticipation.save();
 }
+
+
 
 let startGameRoute = (rq, rs) => {
     req = rq;

@@ -6,9 +6,12 @@ let error = error => res.jsend.error(error);
 let success = result => res.jsend.success(result);
 
 let findParticipation = state => {
+  if (!req.query.pt) {
+    throw new Error('Participation token missing');
+  }
   return req.app.models.Participation.find({
       where: {
-        token: req.body.ParticipationToken
+        token: req.query.pt
       }
     }).then(participation => state.participation = participation)
     .return(state);
@@ -36,13 +39,13 @@ let testStatement = state => {
 
 let findOrCreateAnswer = state => {
   return req.app.models.Answer.findOrBuild({
-    where: {
-      ParticipationId: state.participation.id,
-      StatementId: state.statement.id
-    }
-  })
-  .spread((answer, created) => state.answer = answer)
-  .return(state);
+      where: {
+        ParticipationId: state.participation.id,
+        StatementId: state.statement.id
+      }
+    })
+    .spread((answer, created) => state.answer = answer)
+    .return(state);
 }
 
 let saveAnswer = state => {
@@ -51,16 +54,56 @@ let saveAnswer = state => {
     .return(state);
 }
 
+let getCurrentChapter = state => {
+  return state.statement.getChapter()
+    .then(chapter => {
+      state.currentChapter = chapter;
+    })
+    .return(state);
+}
+let getAllStatementsForChapter = state => {
+    
+    return state.currentChapter.getStatements().then(res => {
+      // getting the number of total statements
+      state.allStatements = res;
+
+    }).return(state);
+}
+
+// getting the number of answered statements
+let findAnsweredStatements = state => {
+  return req.app.models.Answer.findAll({
+    where: {
+      ParticipationId : state.participation.id
+    }
+  }).then(answers => {
+    state.answeredStatements = [];
+    for (var index = 0; index < answers.length; index++) {
+      state.answeredStatements.push(answers[index].StatementId);
+    }
+    return state;
+  });
+}
+
+let checkIfChapterIsComplete = state => {
+  state.statementsLeft = state.allStatements.filter(el => {
+    return state.answeredStatements.indexOf(el.id) < 0;
+  });
+  return state;
+}
+
 let updateParticipation = state => {
-  state.participation.currentChapterId = state.statement.ChapterId;
-  return state.participation.save()
-    .return(state.answer)
+  if (state.statementsLeft.length === 0) {
+    return state.participation.setChapters([state.currentChapter])
+    .return(state.answer);
+  }
+  return state.answer;
 }
 
 let answerRoute = (rq, rs) => {
   req = rq;
   res = rs;
-  const state = { };
+  const state = {};
 
   return Promise.resolve(state)
     .then(findParticipation)
@@ -69,6 +112,10 @@ let answerRoute = (rq, rs) => {
     .then(testStatement)
     .then(findOrCreateAnswer)
     .then(saveAnswer)
+    .then(getCurrentChapter)
+    .then(getAllStatementsForChapter)
+    .then(findAnsweredStatements)
+    .then(checkIfChapterIsComplete)
     .then(updateParticipation)
     .then(success)
     .catch(error); // A tester svp

@@ -8,7 +8,6 @@ module.exports = function (sequelize, DataTypes) {
       type: DataTypes.UUID,
       defaultValue: DataTypes.UUIDV1
     },
-    currentChapterId: DataTypes.INTEGER,
     finished: {
       type: DataTypes.BOOLEAN,
       defaultValue: false
@@ -19,9 +18,7 @@ module.exports = function (sequelize, DataTypes) {
     classMethods: {
       associate: function (models) {
         Participation.hasMany(models.Answer);
-        Participation.belongsTo(models.Chapter, {
-          foreignKey: 'currentChapterId'
-        });
+        Participation.belongsToMany(models.Chapter, { through: 'ChaptersDone' });
       }
     }
   });
