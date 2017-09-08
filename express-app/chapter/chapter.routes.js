@@ -131,7 +131,7 @@ let answeredChapters = participation => {
 }
 
 let inverseChapters = chapters => {
-  return req.app.models.Chapter.findAll()
+  return req.app.models.Chapter.findAll({include:req.app.models.Statement})
     .then(allChapters => {
       return allChapters.filter(el => {
         return chapters.indexOf(el) < 0;
