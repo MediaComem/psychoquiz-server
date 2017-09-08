@@ -96,6 +96,10 @@ let updateParticipation = state => {
     return state.participation.getChapters().then(chapters => {
       chapters.push(state.currentChapter);
       return state.participation.setChapters(chapters)
+        .then(res => {
+          state.participation.finished = true;
+          state.participation.save();
+        })
         .return(state.answer);
     });
   }
