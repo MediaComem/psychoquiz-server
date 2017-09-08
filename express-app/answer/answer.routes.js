@@ -98,9 +98,9 @@ let updateParticipation = state => {
       return state.participation.setChapters(chapters)
         .then(res => {
           state.participation.finished = true;
-          state.participation.save();
-        })
-        .return(state.answer);
+          return state.participation.save()
+            .return(state.answer);
+        });
     });
   }
   return state.answer;
