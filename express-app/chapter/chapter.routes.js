@@ -125,22 +125,34 @@ let findParticipation = token => {
 let answeredChapters = participation => {
   if (!participation) {
     throw new Error('No participation with this token');
-
   }
+  // get completed chapters
   return participation.getChapters();
 }
 
 let inverseChapters = chapters => {
+  // build id table
+  let ids = [];
+  for (let i = 0; i < chapters.length; i++) {
+    ids.push(chapters[i].id);
+  }
   return req.app.models.Chapter.findAll({include:req.app.models.Statement})
     .then(allChapters => {
       return allChapters.filter(el => {
-        return chapters.indexOf(el) < 0;
+        return ids.indexOf(el.id) < 0;
       });
     });
 }
 
-let randomChapter = chapters => {
-  return chapters[Math.floor(Math.random() * chapters.length)];
+let randomChapter = leftChapters => {
+  if (leftChapters.length > 0) {
+    return leftChapters[Math.floor(Math.random() * leftChapters.length)];
+  }
+  return {
+    finished: true,
+    Submissions: []
+  };
+  
 }
 
 let getRandomChapterRoute = (rq, rs) => {

@@ -87,15 +87,17 @@ let findAnsweredStatements = state => {
 
 let checkIfChapterIsComplete = state => {
   state.statementsLeft = state.allStatements.filter(el => {
-    return state.answeredStatements.indexOf(el.id) < 0;
+    return state.answeredStatements.indexOf(el.id) < 0; // statements left (nothing here ?)
   });
   return state;
 }
-
 let updateParticipation = state => {
   if (state.statementsLeft.length === 0) {
-    return state.participation.setChapters([state.currentChapter])
-    .return(state.answer);
+    return state.participation.getChapters().then(chapters => {
+      chapters.push(state.currentChapter);
+      return state.participation.setChapters(chapters)
+        .return(state.answer);
+    });
   }
   return state.answer;
 }
@@ -118,7 +120,7 @@ let answerRoute = (rq, rs) => {
     .then(checkIfChapterIsComplete)
     .then(updateParticipation)
     .then(success)
-    .catch(error); // A tester svp
+    .catch(error);
 }
 
 module.exports = function (app, router) {
