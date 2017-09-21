@@ -6,7 +6,7 @@ let error = error => res.jsend.error(error);
 let success = result => res.jsend.success(result);
 
 
-let getParticipationWithToken = _ => {
+let getParticipationWithToken = state => {
     return req.app.models.Participation.find({
         where: {
             token: req.params.token
@@ -16,15 +16,21 @@ let getParticipationWithToken = _ => {
         }, {
             model: req.app.models.Answer,
         }]
-    });
+    }).then(res => {
+        state.participation = res;
+    }).return(state);
 }
 
 
 let getParticipationRoute = (rq, rs) => {
     req = rq;
     res = rs;
-    return Promise.resolve()
+    let state = {};
+    return Promise.resolve(state)
         .then(getParticipationWithToken)
+        .then(state => {
+            return state.participation;
+        })
         .then(success)
         .catch(error);
 }
@@ -63,103 +69,173 @@ let startGameRoute = (rq, rs) => {
         .catch(error);
 }
 
-let checkIfParticipationComplete = participation => {
-    if (participation.finished) {
-        return participation;
+let checkIfParticipationComplete = state => {
+    if (state.participation && state.participation.finished) {
+        return state;
     } else {
         throw new Error('Participation not complete');
     }
 }
 
 
+let getAllProfiles = state => {
+    return req.app.models.Profile.findAll({
+        include: req.app.models.Weight
+    }).then(res => {
+        state.profiles = res;
+    }).return(state);
+}
 
-let getAnswersAndStatements = participation => {
-    const ans = participation.Answers;
+
+let getAnswersAndStatements = state => {
+    const partAnswers = state.participation.Answers;
     let answers = [];
     return promiseFor(count => {
-        return count < ans.length;
-    }, wer => {
+        return count < partAnswers.length;
+    }, el => {
         return req.app.models.Statement.find({
                 where: {
-                    id: ans[wer].StatementId
+                    id: partAnswers[el].StatementId
                 },
                 include: req.app.models.Weight
             })
-            .then(res => {
-                return res.getProfiles().then(profiles => {
-                    let answer = {
-                        stId: res.id,
-                        text: res.text,
-                        answer: ans[wer].answer,
-                        profiles: getProfilesPerStatement(profiles, ans[wer].answer)
-                    }
+            .then(statement => {
+                
+                let answer = {
+                    stId: statement.id,
+                    text: statement.text,
+                    answer: partAnswers[el].answer,
+                    updatedProfiles: getProfilesPerStatement(state.profiles, partAnswers[el].answer, statement.id)
+                }
 
-                    if (profiles.length > 0) {
-                        answers.push(answer);
-                    }
-                    return ++wer;
-                });
+                if (state.profiles.length > 0) {
+                    answers.push(answer);
+                }
+                return ++el;
             });
     }, 0).then(count => {
-        return answers;
+        state.answers = answers;
+        return state;
     });
 }
 
-let calculateResultProfiles = answers => {
-    let profiles = [];
-    for (var i = 0; i < answers.length; i++) {
-        for (var j = 0; j < answers[i].profiles.length; j++) {
 
-            for (let k = 0; k < profiles.length; k++) {
-                // if it's there
-                if (profiles[k].id === answers[i].profiles[j].id) {
-                    profiles[k].score = profiles[k].score + answers[i].profiles[j].score;
-                }
-            }
-            // Add id only if not yet there
-            let filtered = profiles.filter(el => {
-                return el.id === answers[i].profiles[j].id;
-            });
-            if (filtered.length === 0) {
-                profiles.push(answers[i].profiles[j]);
-            }
-        }
-    }
-    
-    
-    return profiles;
-}
 
-let getProfilesPerStatement = (profi, answer) => {
-    let profiles = [];
-    for (var le = 0; le < profi.length; le++) {
+
+let getProfilesPerStatement = (profi, answer, stid) => {
+    let profiles = [];    
+    for (let le = 0; le < profi.length; le++) {
         let score = 0;
+        
+        let profileWeights = profi[le].Weights;
+        let weightIfTrue = 0;
+        let weightIfFalse = 0;
+        for (var index = 0; index < profileWeights.length; index++) {
+            
+            // Corresponding statement id
+            if (profileWeights[index].StatementId === stid) {
+                weightIfTrue = profileWeights[index].weightIfTrue;
+                weightIfFalse = profileWeights[index].weightIfFalse;
+            } 
+        }
         if (answer) {
-            score = profi[le].Weight.weightIfTrue;
+            score = weightIfTrue;
         } else {
-            score = profi[le].Weight.weightIfFalse;
+            // If we answered no
+            score = weightIfFalse;
+        }
+
+        let max = 0;
+        if (weightIfTrue > weightIfFalse) {
+            max = weightIfTrue;
+        } else {
+            max = weightIfFalse;
         }
 
         let profile = {
             id: profi[le].id,
             name: profi[le].name,
             description: profi[le].description,
-            score: score
+            score: score,
+            total: max
         }
         profiles.push(profile);
     }
     return profiles;
 }
 
+let calculateResultProfiles = state => {
+    let results = [];
+
+    // For each profile, set a score and a maximum total
+
+    for (let p = 0; p < state.profiles.length; p++) {
+        let currentProfile = state.profiles[p];
+        let score = 0;
+        let total = 0;
+
+        
+        for (var i = 0; i < state.answers.length; i++) {
+            // one answer has several profiles linked to it
+            for (var j = 0; j < state.answers[i].updatedProfiles.length; j++) {
+                // push and add the score to the actual results
+                if (currentProfile.id === state.answers[i].updatedProfiles[j].id) {
+                    score = score + state.answers[i].updatedProfiles[j].score;
+                    total = total + state.answers[i].updatedProfiles[j].total;
+                }
+            }
+        }
+
+        let localPercent = 0;
+        if (total > 0 && score > 0) {
+            localPercent = score / total;
+        }
+        
+        results.push({
+            name: currentProfile.name,
+            description: currentProfile.description,
+            score: score,
+            maxScore: total,
+            localPercent: localPercent
+        });
+    }
+    
+    // calculate  global results in percentage. Highest is 100%.
+
+    let min = results.reduce(function(el, curr) {
+        return el.score < curr.score ? el : curr;
+    });
+    let max = results.reduce(function(el, curr) {
+        return el.score > curr.score ? el : curr;
+    });
+
+    let size = max.score - min.score;
+
+    for (var index = 0; index < results.length; index++) {
+        var element = results[index];
+        element.globalPercent = element.score / size;
+    }
+    state.results = results;
+    return state;
+}
+
+
+
+
 
 let getResultsRoute = (rq, rs) => {
     req = rq;
     res = rs;
-    return Promise.resolve()
+    let state = {};
+    return Promise.resolve(state)
         .then(getParticipationWithToken)
         .then(checkIfParticipationComplete)
+        .then(getAllProfiles)
         .then(getAnswersAndStatements)
         .then(calculateResultProfiles)
+        .then(state => {
+            return state.results;
+        })
         .then(success)
         .catch(error);
 }
