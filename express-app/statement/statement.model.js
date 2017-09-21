@@ -12,6 +12,8 @@ module.exports = function (sequelize, DataTypes) {
       associate: function (models) {
         Statement.belongsTo(models.Chapter);
         Statement.hasMany(models.Weight);
+        Statement.belongsToMany(models.Profile, { through: models.Weight });
+        
       }
     }
   });
