@@ -76,41 +76,80 @@ let checkIfParticipationComplete = participation => {
 let getAnswersAndStatements = participation => {
     const ans = participation.Answers;
     let answers = [];
-    return promiseFor(function (i) {
-        return i < ans.length;
-    }, function (wer) {
+    return promiseFor(count => {
+        return count < ans.length;
+    }, wer => {
         return req.app.models.Statement.find({
                 where: {
                     id: ans[wer].StatementId
                 },
                 include: req.app.models.Weight
             })
-            .then(function (res) {
+            .then(res => {
                 return res.getProfiles().then(profiles => {
                     let answer = {
                         stId: res.id,
                         text: res.text,
                         answer: ans[wer].answer,
-                        weights: res.Weights,
-                        profiles: profiles
+                        profiles: getProfilesPerStatement(profiles, ans[wer].answer)
                     }
-                    answers.push(answer);
+
+                    if (profiles.length > 0) {
+                        answers.push(answer);
+                    }
                     return ++wer;
                 });
             });
-    }, 0).then(res => {
+    }, 0).then(count => {
         return answers;
-
     });
-
 }
 
+let calculateResultProfiles = answers => {
+    let profiles = [];
+    for (var i = 0; i < answers.length; i++) {
+        for (var j = 0; j < answers[i].profiles.length; j++) {
 
-let promiseFor = Promise.method(function (condition, action, value) {
-    if (!condition(value)) return value;
-    return action(value).then(promiseFor.bind(null, condition, action));
-});
+            for (let k = 0; k < profiles.length; k++) {
+                // if it's there
+                if (profiles[k].id === answers[i].profiles[j].id) {
+                    profiles[k].score = profiles[k].score + answers[i].profiles[j].score;
+                }
+            }
+            // Add id only if not yet there
+            let filtered = profiles.filter(el => {
+                return el.id === answers[i].profiles[j].id;
+            });
+            if (filtered.length === 0) {
+                profiles.push(answers[i].profiles[j]);
+            }
+        }
+    }
+    
+    
+    return profiles;
+}
 
+let getProfilesPerStatement = (profi, answer) => {
+    let profiles = [];
+    for (var le = 0; le < profi.length; le++) {
+        let score = 0;
+        if (answer) {
+            score = profi[le].Weight.weightIfTrue;
+        } else {
+            score = profi[le].Weight.weightIfFalse;
+        }
+
+        let profile = {
+            id: profi[le].id,
+            name: profi[le].name,
+            description: profi[le].description,
+            score: score
+        }
+        profiles.push(profile);
+    }
+    return profiles;
+}
 
 
 let getResultsRoute = (rq, rs) => {
@@ -120,9 +159,16 @@ let getResultsRoute = (rq, rs) => {
         .then(getParticipationWithToken)
         .then(checkIfParticipationComplete)
         .then(getAnswersAndStatements)
+        .then(calculateResultProfiles)
         .then(success)
         .catch(error);
 }
+
+
+let promiseFor = Promise.method(function (condition, action, value) {
+    if (!condition(value)) return value;
+    return action(value).then(promiseFor.bind(null, condition, action));
+});
 
 module.exports = function (app, router) {
     router.post('/api/participations', startGameRoute);

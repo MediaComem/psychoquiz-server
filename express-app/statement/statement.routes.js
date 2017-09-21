@@ -1,5 +1,7 @@
 'use strict';
 
+let Promise = require('bluebird');
+
 let req, res;
 let error = error => res.jsend.error(error);
 let success = result => res.jsend.success(result);
@@ -48,7 +50,7 @@ let getStatementByIdRoute = (rq, rs) => {
 
 /**
  * Get and test chapter to attach the statement to.
- */   
+ */
 
 let findChapterById = _ => {
   return req.app.models.Chapter.findById(req.body.ChapterId);
@@ -73,6 +75,44 @@ let createStatement = chapter => {
   return newStatement.save();
 }
 
+let linkStatement = statement => {
+  let profi = req.body.profiles;
+  
+  return promiseFor(count => {
+    return count < profi.length;
+  }, le => {
+    return createWeight(profi[le], statement.id)
+      .then(res => {
+        console.log(res);
+        return ++le;
+      });
+  }, 0).then(count => {
+    return statement;
+  });
+ 
+}
+
+
+let createWeight = (profile, stid) => {
+  let findWeight = req.app.models.Weight.findAll({
+    where: {
+      ProfileId: profile.id,
+      StatementId: stid
+    }
+  }).then(res => {
+    if (res.length > 1) {
+      throw new Error('Profile and Statement already have a weight');
+    }
+  })
+  let newWeight = req.app.models.Weight.build({
+    weightIfTrue: profile.true,
+    weightIfFalse: profile.false,
+    ProfileId: profile.id,
+    StatementId: stid
+  });
+  return newWeight.save();
+}
+
 let createStatementRoute = (rq, rs) => {
   req = rq;
   res = rs;
@@ -80,6 +120,7 @@ let createStatementRoute = (rq, rs) => {
     .then(findChapterById)
     .then(testChapter)
     .then(createStatement)
+    .then(linkStatement)
     .then(success)
     .catch(error); // A tester svp
 }
@@ -126,6 +167,10 @@ let deleteStatementRoute = (rq, rs) => {
     .catch(error);
 }
 
+let promiseFor = Promise.method(function (condition, action, value) {
+  if (!condition(value)) return value;
+  return action(value).then(promiseFor.bind(null, condition, action));
+});
 
 /**
  *  Route definitions
