@@ -27,23 +27,34 @@ let getStatementsRoute = (rq, rs) => {
  * Get a specific statement
  */
 
-let findStatementById = _ => {
-  return req.app.models.Statement.findById(req.params.id);
+let findStatementById = state => {
+  return req.app.models.Statement.findOne({
+    where: {
+      id: req.params.id
+    },
+    include: [req.app.models.Profile]
+  }).then(res => {
+    state.statement = res;
+  }).return(state);
 }
 
-let testStatement = statement => {
-  if (!statement) {
+let testStatement = state => {
+  if (!state.statement) {
     throw new Error('Statement not found');
   }
-  return statement;
+  return state;
 }
 
 let getStatementByIdRoute = (rq, rs) => {
   req = rq;
   res = rs;
-  return Promise.resolve()
+  let state = {};
+  return Promise.resolve(state)
     .then(findStatementById)
     .then(testStatement)
+    .then(st => {
+      return st.statement;
+    })
     .then(success)
     .catch(error);
 }
@@ -52,97 +63,128 @@ let getStatementByIdRoute = (rq, rs) => {
  * Get and test chapter to attach the statement to.
  */
 
-let findChapterById = _ => {
-  return req.app.models.Chapter.findById(req.body.ChapterId);
+let findChapterById = state => {
+  return req.app.models.Chapter.findById(req.body.ChapterId)
+    .then(chap => {
+      state.chapter = chap;
+    })
+    .return(state);
 }
 
-let testChapter = chapter => {
-  if (!chapter) {
+let testChapter = state => {
+  if (!state.chapter) {
     throw new Error('Chapter not found');
   }
-  return chapter;
+  return state;
 }
 
 /**
  * Create a new statement
  */
 
-let createStatement = chapter => {
+let createStatement = state => {
   let newStatement = req.app.models.Statement.build({
     text: req.body.text,
-    ChapterId: chapter.id
+    ChapterId: state.chapter.id
   });
-  return newStatement.save();
+
+  return newStatement.save().then(statement => {
+    state.statement = statement;
+  }).return(state);
 }
 
-let linkStatement = statement => {
-  let profi = req.body.profiles;
+let linkStatement = state => {
   
+  let profi = req.body.profiles;
+
   return promiseFor(count => {
     return count < profi.length;
   }, le => {
-    return createWeight(profi[le], statement.id)
+    return createWeight(profi[le], state.statement.id)
       .then(res => {
-        console.log(res);
         return ++le;
       });
   }, 0).then(count => {
-    return statement;
-  });
- 
+    state.count = count;
+  }).return(state);
 }
 
 
 let createWeight = (profile, stid) => {
-  let findWeight = req.app.models.Weight.findAll({
-    where: {
-      ProfileId: profile.id,
-      StatementId: stid
-    }
-  }).then(res => {
-    if (res.length > 1) {
-      throw new Error('Profile and Statement already have a weight');
-    }
-  })
-  let newWeight = req.app.models.Weight.build({
+  let weightConditions = {
+    ProfileId: profile.id,
+    StatementId: stid
+  }
+  let weightValues = {
     weightIfTrue: profile.true,
     weightIfFalse: profile.false,
     ProfileId: profile.id,
     StatementId: stid
-  });
-  return newWeight.save();
+  };
+
+  return upsertWeight(weightValues, weightConditions);
+}
+
+
+let upsertWeight = (values, condition) => {
+  return req.app.models.Weight
+    .findOne({
+      where: condition
+    })
+    .then(function (obj) {
+      if (obj) { // update
+        return obj.update(values);
+      } else { // insert
+        return req.app.models.Weight.create(values);
+      }
+    });
 }
 
 let createStatementRoute = (rq, rs) => {
   req = rq;
   res = rs;
-  return Promise.resolve()
+  let state = {};
+  return Promise.resolve(state)
     .then(findChapterById)
     .then(testChapter)
     .then(createStatement)
     .then(linkStatement)
+    .then(state => {
+      return state.statement;
+    })
     .then(success)
-    .catch(error); // A tester svp
+    .catch(error);
 }
+
+
 
 /**
  * Update a specific statement
  */
-let updateStatement = statement => {
-  statement.text = req.body.text || statement.text;
-  statement.ChapterId = req.body.ChapterId || statement.ChapterId;
-  return statement.save();
+let updateStatement = state => {
+  state.statement.text = req.body.text || state.statement.text;
+  state.statement.ChapterId = req.body.ChapterId || state.statement.ChapterId;
+  return state.statement.save()
+    .return(state);
 }
 
 let updateStatementRoute = (rq, rs) => {
+
   req = rq;
   res = rs;
-  return Promise.resolve()
+  let state = {};
+  return Promise.resolve(state)
     .then(findStatementById)
     .then(testStatement)
     .then(findChapterById)
     .then(testChapter)
     .then(updateStatement)
+    .then(linkStatement)
+    // reload the statement to have the links (this is dirty...)
+    .then(findStatementById)
+    .then(state => {
+      return state.statement;
+    })
     .then(success)
     .catch(error);
 }
@@ -152,14 +194,15 @@ let updateStatementRoute = (rq, rs) => {
  * Delete a statement
  */
 
-let deleteStatement = statement => {
-  return statement.destroy();
+let deleteStatement = state => {
+  return state.statement.destroy();
 }
 
 let deleteStatementRoute = (rq, rs) => {
   req = rq;
   res = rs;
-  return Promise.resolve()
+  let state = {};
+  return Promise.resolve(state)
     .then(findStatementById)
     .then(testStatement)
     .then(deleteStatement)
