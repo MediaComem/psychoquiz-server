@@ -201,10 +201,10 @@ let calculateResultProfiles = state => {
     }
     
     // calculate  global results in percentage. Highest is 100%.
-
     let min = results.reduce(function(el, curr) {
         return el.score < curr.score ? el : curr;
     });
+
     let max = results.reduce(function(el, curr) {
         return el.score > curr.score ? el : curr;
     });
@@ -213,7 +213,7 @@ let calculateResultProfiles = state => {
 
     for (var index = 0; index < results.length; index++) {
         var element = results[index];
-        element.globalPercent = element.score / size;
+        element.globalPercent = (element.score - min.score) / size;
     }
     state.results = results;
     return state;
