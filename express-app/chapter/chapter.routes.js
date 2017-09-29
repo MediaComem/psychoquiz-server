@@ -77,8 +77,10 @@ let createChapterRoute = (rq, rs) => {
  * Update a specific chapter
  */
 let updateChapter = chapter => {
+  chapter.title = req.body.title || chapter.title;
   chapter.intro = req.body.intro || chapter.intro;
   chapter.imgUrl = req.body.imgUrl || chapter.imgUrl;
+  chapter.number = req.body.number || chapter.number;
   return chapter.save();
 }
 

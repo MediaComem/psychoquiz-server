@@ -94,19 +94,20 @@ let createStatement = state => {
 }
 
 let linkStatement = state => {
-  
-  let profi = req.body.profiles;
-
-  return promiseFor(count => {
-    return count < profi.length;
-  }, le => {
-    return createWeight(profi[le], state.statement.id)
-      .then(res => {
-        return ++le;
-      });
-  }, 0).then(count => {
-    state.count = count;
-  }).return(state);
+  if (req.body.profiles) {
+    let profi = req.body.profiles;    
+    return promiseFor(count => {
+      return count < profi.length;
+    }, le => {
+      return createWeight(profi[le], state.statement.id)
+        .then(res => {
+          return ++le;
+        });
+    }, 0).then(count => {
+      state.count = count;
+    }).return(state);
+  }
+  return state;
 }
 
 
