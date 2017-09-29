@@ -11,7 +11,9 @@ let success = result => res.jsend.success(result);
  * Get all statements
  */
 let getStatements = _ => {
-  return req.app.models.Statement.findAll();
+  return req.app.models.Statement.findAll({ order: [
+    ['ChapterId', 'ASC']
+  ]});
 }
 
 let getStatementsRoute = (rq, rs) => {
