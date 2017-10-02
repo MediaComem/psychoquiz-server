@@ -5,7 +5,9 @@ module.exports = function (sequelize, DataTypes) {
   // Define fields
   let fields = {
     weightIfTrue: DataTypes.INTEGER,
-    weightIfFalse: DataTypes.INTEGER
+    weightIfFalse: DataTypes.INTEGER,
+    ProfileId: DataTypes.INTEGER,
+    StatementId: DataTypes.INTEGER
   };
   // Define Model
   let Weight = sequelize.define("Weight", fields, {
