@@ -147,7 +147,7 @@ let inverseChapters = chapters => {
 }
 
 let randomChapter = leftChapters => {
-  if (leftChapters.length > 0) {
+  if (leftChapters.length > 20) { // todo: change 20 in case there is less than 20 chapters total.
     return leftChapters[Math.floor(Math.random() * leftChapters.length)];
   }
   return {
