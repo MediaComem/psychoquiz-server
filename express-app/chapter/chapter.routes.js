@@ -138,7 +138,15 @@ let inverseChapters = chapters => {
   for (let i = 0; i < chapters.length; i++) {
     ids.push(chapters[i].id);
   }
-  return req.app.models.Chapter.findAll({include:req.app.models.Statement})
+  return req.app.models.Chapter.findAll(
+    {
+      include:req.app.models.Statement,
+      order: [
+        [
+          req.app.models.Statement, 'id', 'ASC'
+        ]
+      ]
+    }) // todo change order by in include
     .then(allChapters => {
       return allChapters.filter(el => {
         return ids.indexOf(el.id) < 0;

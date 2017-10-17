@@ -2,7 +2,7 @@
   "dev": {
     "driver": "mysql",
     "user": "root",
-    "database": "psychoquiz",
+    "database": "tonperejesuis",
     "password": "root"
   },
  
