@@ -1,5 +1,7 @@
 'use strict';
 let Promise = require('bluebird');
+let uuidBase62 = require('uuid-base62');
+
 
 let req, res;
 let error = error => res.jsend.error(error);
@@ -10,6 +12,23 @@ let getParticipationWithToken = state => {
     return req.app.models.Participation.find({
         where: {
             token: req.params.token
+        },
+        include: [{
+            model: req.app.models.Chapter,
+        }, {
+            model: req.app.models.Answer,
+        }]
+    }).then(res => {
+        state.participation = res;
+    }).return(state);
+}
+
+let getParticipationWithCode = state => {
+    let token = uuidBase62.decode(req.params.code);
+
+    return req.app.models.Participation.find({
+        where: {
+            token: token
         },
         include: [{
             model: req.app.models.Chapter,
@@ -241,6 +260,36 @@ let getResultsRoute = (rq, rs) => {
 }
 
 
+
+let getResultsWithShareCodeRoute = (rq, rs) => {
+    req = rq;
+    res = rs;
+    let state = {};
+    return Promise.resolve(state)
+        .then(getParticipationWithCode)
+        .then(checkIfParticipationComplete)
+        .then(getAllProfiles)
+        .then(getAnswersAndStatements)
+        .then(calculateResultProfiles)
+        .then(state => {
+            return state.results;
+        })
+        .then(success)
+        .catch(error);
+}
+
+let getParticipationShareLinkRoute = (rq, rs) => {
+    req = rq;
+    res = rs;
+
+    return Promise.resolve()
+        .then(_ => {
+            return uuidBase62.encode(req.params.token);     
+        })
+        .then(success)
+        .catch(error);
+}
+
 let promiseFor = Promise.method(function (condition, action, value) {
     if (!condition(value)) return value;
     return action(value).then(promiseFor.bind(null, condition, action));
@@ -250,5 +299,7 @@ module.exports = function (app, router) {
     router.post('/api/participations', startGameRoute);
     router.get('/api/participations', getAllParticipationsRoute);
     router.get('/api/participations/:token', getParticipationRoute);
+    router.get('/api/share/:code', getResultsWithShareCodeRoute);
     router.get('/api/participations/:token/results', getResultsRoute);
+    router.get('/api/participations/:token/share', getParticipationShareLinkRoute);
 }
