@@ -55,12 +55,13 @@ let getProfileByIdRoute = (rq, rs) => {
 /**
  * Create a new profile
  */
-let createProfileRoute = (rq, rs) => {
+const createProfileRoute = (rq, rs) => {
   req = rq;
   res = rs;
-  let newProfile = req.app.models.Profile.build({
+  const newProfile = req.app.models.Profile.build({
     name: req.body.name,
     description: req.body.description,
+    body: req.body.body    
   });
   return Promise.resolve()
     .then(_ => newProfile.save())
@@ -71,13 +72,16 @@ let createProfileRoute = (rq, rs) => {
 /**
  * Update a specific profile
  */
-let updateProfile = profile => {
+const updateProfile = profile => {
   profile.name = req.body.name || profile.name;
   profile.description = req.body.description || profile.description;
+  profile.body = req.body.body || profile.body;
+  
   return profile.save();
+
 }
 
-let updateProfileRoute = (rq, rs) => {
+const updateProfileRoute = (rq, rs) => {
   req = rq;
   res = rs;
   return Promise.resolve()
@@ -93,11 +97,11 @@ let updateProfileRoute = (rq, rs) => {
  * Delete a profile
  */
 
-let deleteProfile = profile => {
+const deleteProfile = profile => {
   return profile.destroy();
 }
 
-let deleteProfileRoute = (rq, rs) => {
+const deleteProfileRoute = (rq, rs) => {
   req = rq;
   res = rs;
   return Promise.resolve()

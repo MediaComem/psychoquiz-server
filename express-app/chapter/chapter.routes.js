@@ -129,10 +129,11 @@ let answeredChapters = participation => {
     throw new Error('No participation with this token');
   }
   // get completed chapters
-  return participation.getChapters();
+  return participation.getChapters(); // doesn't work
 }
 
-let inverseChapters = chapters => {
+const inverseChapters = chapters => {
+  console.log(chapters);
   // build id table
   let ids = [];
   for (let i = 0; i < chapters.length; i++) {
@@ -154,7 +155,8 @@ let inverseChapters = chapters => {
     });
 }
 
-let randomChapter = leftChapters => {
+const randomChapter = leftChapters => {
+  //console.log(leftChapters.length);
   if (leftChapters.length > 20) { // todo: change 20 in case there is less than 20 chapters total.
     return leftChapters[Math.floor(Math.random() * leftChapters.length)];
   }
@@ -165,7 +167,7 @@ let randomChapter = leftChapters => {
   
 }
 
-let getRandomChapterRoute = (rq, rs) => {
+const getRandomChapterRoute = (rq, rs) => {
   req = rq;
   res = rs;
   const token = req.query.pt;

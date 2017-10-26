@@ -49,7 +49,7 @@ let findOrCreateAnswer = state => {
 }
 
 let saveAnswer = state => {
-  state.answer.answer = req.body.answer;
+  state.answer.answer = req.body.answer;  
   return state.answer.save()
     .return(state);
 }

@@ -3,18 +3,17 @@
 module.exports = function (sequelize, DataTypes) {
 
   // Define fields
-  let fields = {
+  const fields = {
     name: DataTypes.STRING,
-    description: DataTypes.STRING
+    description: DataTypes.STRING,
+    body: DataTypes.TEXT('long')
   };
   // Define Model
-  let Profile = sequelize.define("Profile", fields, {
-    classMethods: {
-      associate: function (models) {
-        Profile.hasMany(models.Weight);
-      }
-    }
-  });
+  const Profile = sequelize.define("Profile", fields, { });
+
+  Profile.associate = models => {
+    Profile.hasMany(models.Weight);
+  }
 
   return Profile;
 

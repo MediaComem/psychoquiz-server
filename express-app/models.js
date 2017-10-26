@@ -11,7 +11,8 @@ let db = {};
 // Using sync to avoid migrations. The database is synchronised with the actual models in the code.
 // be careful with this value set to true, it will recreate the database
 // when editing the schemas, and therefore removing all the data.
-const forceSync = false; 
+const forceSync = false;
+const alterSync = true;
 
 
 let createConfig = state => {
@@ -21,8 +22,7 @@ let createConfig = state => {
     state.config.dbpass, {
       host: state.config.dbhost,
       dialect: state.config.dbdialect,
-      logging: state.config.dblogging,
-      pool: false
+      logging: state.config.dblogging
 
     });
   return state;
@@ -59,9 +59,10 @@ let associateDb = state => {
 
 
 let syncSeq = state => {
-  state.sequelize.sync({
-    force: forceSync
-  });
+  state.sequelize.sync([{
+    force: forceSync,
+    alter: alterSync
+  }]);
   return state;
 };
 

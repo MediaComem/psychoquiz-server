@@ -3,18 +3,16 @@
 module.exports = function (sequelize, DataTypes) {
 
   // Define fields
-  let fields = {
+  const fields = {
     answer: DataTypes.BOOLEAN
   };
   // Define Model
-  let Answer = sequelize.define("Answer", fields, {
-    classMethods: {
-      associate: function (models) {
-        Answer.belongsTo(models.Participation);
-        Answer.belongsTo(models.Statement);
-      }
-    }
-  });
+  const Answer = sequelize.define("Answer", fields, {});
+
+  Answer.associate = models => {
+    Answer.belongsTo(models.Participation);
+    Answer.belongsTo(models.Statement);
+  }
   
   return Answer;
 };

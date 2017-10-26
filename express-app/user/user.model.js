@@ -10,21 +10,17 @@ module.exports = function (sequelize, DataTypes) {
         role: DataTypes.STRING
     };
     // Define Model
-    let User = sequelize.define("User", fields, {
-        instanceMethods: {
-            // Delete password from all the default getters by rewriting toJSON output
-            toJSON: function () {
-                var values = this.get();
-                delete values.hash_password; // encrypted password
-                return values;
-            },
-            comparePassword: function(password) {
-                return bcrypt.compareSync(password, this.hash_password);
-            }
+    let User = sequelize.define("User", fields, {});
 
-        }
+    User.prototype.toJSON = _ => {
+        var values = this.get();
+        delete values.hash_password; // encrypted password
+        return values;
+    }
 
-    });
+    User.prototype.comparePassword = password => {
+        return bcrypt.compareSync(password, this.hash_password);
+    }
 
     return User;
 };

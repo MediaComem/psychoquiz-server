@@ -3,7 +3,7 @@
 module.exports = function (sequelize, DataTypes) {
 
   // Define fields
-  let fields = {
+  const fields = {
     token: {
       type: DataTypes.UUID,
       defaultValue: DataTypes.UUIDV1
@@ -14,14 +14,13 @@ module.exports = function (sequelize, DataTypes) {
     }
   };
   // Define Model
-  let Participation = sequelize.define("Participation", fields, {
-    classMethods: {
-      associate: function (models) {
-        Participation.hasMany(models.Answer);
-        Participation.belongsToMany(models.Chapter, { through: 'ChaptersDone' });
-      }
-    }
-  });
+  const Participation = sequelize.define("Participation", fields, { });
+
+  Participation.associate = models => {
+    Participation.hasMany(models.Answer);
+    Participation.belongsToMany(models.Chapter, { through: 'ChaptersDone' });
+  }
 
   return Participation;
+  
 };
