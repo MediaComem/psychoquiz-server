@@ -133,7 +133,6 @@ let answeredChapters = participation => {
 }
 
 const inverseChapters = chapters => {
-  console.log(chapters);
   // build id table
   let ids = [];
   for (let i = 0; i < chapters.length; i++) {

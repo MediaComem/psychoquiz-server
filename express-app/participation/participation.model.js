@@ -12,6 +12,7 @@ module.exports = function (sequelize, DataTypes) {
       type: DataTypes.BOOLEAN,
       defaultValue: false
     }
+    
   };
   // Define Model
   const Participation = sequelize.define("Participation", fields, { });
