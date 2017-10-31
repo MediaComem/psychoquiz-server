@@ -219,6 +219,9 @@ let calculateResultProfiles = state => {
             maxScore: total,
             localPercent: localPercent
         });
+        // order results by localPercent
+        results.sort((a,b) => {return (a.localPercent < b.localPercent) ? 1 : ((b.localPercent < a.localPercent) ? -1 : 0);} ); 
+        
     }
     
     // calculate  global results in percentage. Highest is 100%.
