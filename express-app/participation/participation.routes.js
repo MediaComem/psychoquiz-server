@@ -175,6 +175,7 @@ let getProfilesPerStatement = (profi, answer, stid) => {
             id: profi[le].id,
             name: profi[le].name,
             description: profi[le].description,
+            body: profi[le].body,
             score: score,
             total: max
         }
@@ -213,6 +214,7 @@ let calculateResultProfiles = state => {
         results.push({
             name: currentProfile.name,
             description: currentProfile.description,
+            body: currentProfile.body,
             score: score,
             maxScore: total,
             localPercent: localPercent
