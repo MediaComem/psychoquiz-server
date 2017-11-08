@@ -1,16 +1,16 @@
 'use strict';
 
-let bcrypt = require('bcrypt');
-let jsonwebtoken = require('jsonwebtoken');
+const bcrypt = require('bcrypt');
+const jsonwebtoken = require('jsonwebtoken');
 
 let req, res;
-let error = error => res.jsend.error(error);
-let success = result => res.jsend.success(result);
+const error = error => res.jsend.error(error);
+const success = result => res.jsend.success(result);
 
-let key = process.env.JWT_KEY;
+const key = process.env.JWT_KEY;
 
 
-let findUsersByEmail = _ => {
+const findUsersByEmail = _ => {
     return req.app.models.User.findAll({
         where: {
             email: req.body.email
@@ -18,7 +18,7 @@ let findUsersByEmail = _ => {
     })
 }
 
-let testIfNewUser = users => {
+const testIfNewUser = users => {
     if (users.length > 0) {
         throw new Error('Email already exists in database');
     }
@@ -27,15 +27,15 @@ let testIfNewUser = users => {
 
 
 
-let createUser = users => {
-    let newUser = req.app.models.User.build({
+const createUser = users => {
+    const newUser = req.app.models.User.build({
         email: req.body.email,
         hash_password: bcrypt.hashSync(req.body.password, 10)
     });
     return newUser.save();
 }
 
-let registerRoute = (rq, rs) => {
+const registerRoute = (rq, rs) => {
 
     req = rq;
     res = rs;
@@ -49,7 +49,7 @@ let registerRoute = (rq, rs) => {
 
 }
 
-let testIfUserExists = users => {
+const testIfUserExists = users => {
     if (users.length == 0) {
         throw new Error('User not found');
     }
@@ -57,24 +57,24 @@ let testIfUserExists = users => {
 }
 
 
-let testPassword = user => {
+const testPassword = user => {
     if (!user.comparePassword(req.body.password)) {
         throw new Error('Wrong password');
     }
     return user;
 }
 
-let generateToken = user => {
+const generateToken = user => {
     return {
         token: jsonwebtoken.sign({
             email: user.email,
-            id: user.id
+            id: user.id // TODO: Expires
         }, key)
     };
 
 }
 
-let loginRoute = (rq, rs) => {
+const loginRoute = (rq, rs) => {
     req = rq;
     res = rs;
     return Promise.resolve()
@@ -98,6 +98,6 @@ let loginRoute = (rq, rs) => {
 
 module.exports = function (app, router) {
     router.post('/api/auth/login', loginRoute);
-    router.post('/api/auth/register', registerRoute);
+    router.post('/api/auth/register', registerRoute); // TODO: Auth
    //router.get('/api/auth/user', checkUserRoute);
 }

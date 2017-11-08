@@ -118,9 +118,10 @@ let deleteWeightRoute = (rq, rs) => {
  */
 
 module.exports = function (app, router) {
-  router.get('/api/weights', getWeightsRoute);
+  // TODO: Check if necessary
+  /*router.get('/api/weights', getWeightsRoute);
   router.post('/api/weights', createWeightRoute);
   router.get('/api/weights/:id', getWeightByIdRoute);
   router.put('/api/weights/:id', updateWeightRoute);
-  router.delete('/api/weights/:id', deleteWeightRoute);
+  router.delete('/api/weights/:id', deleteWeightRoute);*/
 }

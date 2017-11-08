@@ -155,8 +155,7 @@ const inverseChapters = chapters => {
 }
 
 const randomChapter = leftChapters => {
-  //console.log(leftChapters.length);
-  if (leftChapters.length > 20) { // todo: change 20 in case there is less than 20 chapters total.
+  if (leftChapters.length > 20) { // FIXME: change 20 in case there is less than 20 chapters total.
     return leftChapters[Math.floor(Math.random() * leftChapters.length)];
   }
   return {
@@ -191,6 +190,6 @@ module.exports = function (app, router) {
   router.post('/api/chapters', createChapterRoute);
   router.get('/api/chapters/random', getRandomChapterRoute);
   router.get('/api/chapters/:id', getChapterByIdRoute);
-  router.put('/api/chapters/:id', updateChapterRoute);
-  router.delete('/api/chapters/:id', deleteChapterRoute);
+  router.put('/api/chapters/:id', updateChapterRoute); // TODO: auth
+  router.delete('/api/chapters/:id', deleteChapterRoute); // TODO: auth
 }

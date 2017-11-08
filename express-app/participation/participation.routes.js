@@ -195,9 +195,9 @@ let calculateResultProfiles = state => {
         let total = 0;
 
         
-        for (var i = 0; i < state.answers.length; i++) {
+        for (let i = 0; i < state.answers.length; i++) {
             // one answer has several profiles linked to it
-            for (var j = 0; j < state.answers[i].updatedProfiles.length; j++) {
+            for (let j = 0; j < state.answers[i].updatedProfiles.length; j++) {
                 // push and add the score to the actual results
                 if (currentProfile.id === state.answers[i].updatedProfiles[j].id) {
                     score = score + state.answers[i].updatedProfiles[j].score;
@@ -302,9 +302,9 @@ let promiseFor = Promise.method(function (condition, action, value) {
 
 module.exports = function (app, router) {
     router.post('/api/participations', startGameRoute);
-    router.get('/api/participations', getAllParticipationsRoute);
+    router.get('/api/participations', getAllParticipationsRoute); // TODO: Auth
     router.get('/api/participations/:token', getParticipationRoute);
-    router.get('/api/share/:code', getResultsWithShareCodeRoute);
+    router.get('/api/share/:code', getResultsWithShareCodeRoute); // TODO: Remove ?
     router.get('/api/participations/:token/results', getResultsRoute);
     router.get('/api/participations/:token/share', getParticipationShareLinkRoute);
 }

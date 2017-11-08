@@ -5,19 +5,19 @@ global.include = function (name) {
 };
 
 // vendor resources
-let express       = require('express');
-let mysql         = require('mysql');
-let bodyParser    = require('body-parser');
-let trycatch      = require('trycatch');
-let jsend         = require('jsend');
-let nodemailer    = require('nodemailer');
-let smtpTransport = require("nodemailer-smtp-transport");
+const express       = require('express');
+const mysql         = require('mysql');
+const bodyParser    = require('body-parser');
+const trycatch      = require('trycatch');
+const jsend         = require('jsend');
+const nodemailer    = require('nodemailer');
+const smtpTransport = require("nodemailer-smtp-transport");
 
 // get router instance
-let router        = express.Router();
+const router        = express.Router();
 
 // get express singleton instance
-let app = express();
+const app = express();
 
 
 // use .env files as configuration files
@@ -65,7 +65,7 @@ require('./express-app/models')(app.config).then(seq => {
   /**
    * Start listening.
    */
-  let server = app.listen(app.config.port, () => {
+  const server = app.listen(app.config.port, () => {
 
     console.log(
       'Running in NODE_ENV: ' + process.env.NODE_ENV + ' \n' +

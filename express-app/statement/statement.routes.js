@@ -223,9 +223,9 @@ let promiseFor = Promise.method(function (condition, action, value) {
  */
 
 module.exports = function (app, router) {
-  router.get('/api/statements', getStatementsRoute);
-  router.post('/api/statements', createStatementRoute);
-  router.get('/api/statements/:id', getStatementByIdRoute);
-  router.put('/api/statements/:id', updateStatementRoute);
-  router.delete('/api/statements/:id', deleteStatementRoute);
+  router.get('/api/statements', getStatementsRoute); // TODO: Auth
+  router.post('/api/statements', createStatementRoute);  // TODO: Auth
+  router.get('/api/statements/:id', getStatementByIdRoute);  // TODO: Auth
+  router.put('/api/statements/:id', updateStatementRoute);  // TODO: Auth
+  router.delete('/api/statements/:id', deleteStatementRoute);  // TODO: Auth
 }

@@ -20,7 +20,7 @@ module.exports = function (app, router) {
     res = rs;
     return Promise.resolve()
       .then(_ => {
-        res.sendFile(dir + req.params.profile + '.html');
+        res.sendFile(dir + req.params.profile + '.html'); // @TODO: Systeme de templating
       });
 
   }
