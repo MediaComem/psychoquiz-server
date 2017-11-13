@@ -73,7 +73,8 @@ switch (process.env.NODE_ENV) {
 
 config.users = [];
 Object.keys(process.env).some((k) => {
-  if (~k.indexOf("USER_")) {
+  // FIXME: add a prefix to this environment variable
+  if (k.indexOf("USER_") === 0) {
     try {
       let login = k.split('_')[1].toLowerCase();
       if (login.length<1) {
