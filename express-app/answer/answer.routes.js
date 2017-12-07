@@ -1,6 +1,5 @@
 'use strict';
 
-
 let req, res;
 let error = error => res.jsend.error(error);
 let success = result => res.jsend.success(result);

@@ -1,6 +1,6 @@
 'use strict';
-
-let Promise = require('bluebird');
+const Promise = require('bluebird');
+const debug = require('debug')('psychoquiz:statements');
 
 let req, res;
 let error = error => res.jsend.error(error);
@@ -223,9 +223,14 @@ let promiseFor = Promise.method(function (condition, action, value) {
  */
 
 module.exports = function (app, router) {
-  router.get('/api/statements', getStatementsRoute); // TODO: Auth
-  router.post('/api/statements', createStatementRoute);  // TODO: Auth
-  router.get('/api/statements/:id', getStatementByIdRoute);  // TODO: Auth
-  router.put('/api/statements/:id', updateStatementRoute);  // TODO: Auth
-  router.delete('/api/statements/:id', deleteStatementRoute);  // TODO: Auth
+  if (app.config.adminEnabled) {
+    debug('Statements admin API enabled');
+    router.get('/api/statements', getStatementsRoute);
+    router.post('/api/statements', createStatementRoute);
+    router.get('/api/statements/:id', getStatementByIdRoute);
+    router.put('/api/statements/:id', updateStatementRoute);
+    router.delete('/api/statements/:id', deleteStatementRoute);
+  } else {
+    debug('Statements admin API disabled');
+  }
 }

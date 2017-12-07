@@ -3,6 +3,7 @@ let config = {};
 switch (process.env.NODE_ENV) {
   case 'development':
     config = {
+      'adminEnabled': process.env.PSYCHOQUIZ_ADMIN ? !!process.env.PSYCHOQUIZ_ADMIN.match(/^(1|y|yes|t|true)$/i) : true,
       'connectionString': 'mysql://' + process.env.DB_DEV_USER + ':' + process.env.DB_DEV_PASS + '@' + process.env.DB_DEV_HOST + ':3306/' + process.env.DB_DEV_NAME,
       'dbuser': process.env.DB_DEV_USER,
       'dbname': process.env.DB_DEV_NAME,
@@ -25,6 +26,7 @@ switch (process.env.NODE_ENV) {
     break;
   case 'production':
     config = {
+      'adminEnabled': process.env.PSYCHOQUIZ_ADMIN ? !!process.env.PSYCHOQUIZ_ADMIN.match(/^(1|y|yes|t|true)$/i) : true,
       'connectionString': 'mysql://' + process.env.DB_PROD_USER + ':' + process.env.DB_PROD_PASS + '@' + process.env.DB_PROD_HOST + ':3306/' + process.env.DB_PROD_NAME,
       'dbuser': process.env.DB_PROD_USER,
       'dbname': process.env.DB_PROD_NAME,
@@ -47,6 +49,7 @@ switch (process.env.NODE_ENV) {
     break;
   default:
     config = {
+      'adminEnabled': process.env.PSYCHOQUIZ_ADMIN ? !!process.env.PSYCHOQUIZ_ADMIN.match(/^(1|y|yes|t|true)$/i) : true,
       'connectionString': 'postgres://' + process.env.DB_DEV_USER + ':' + process.env.DB_DEV_PASS + '@' + process.env.DB_DEV_HOST + ':5432/' + process.env.DB_DEV_NAME,
       'dbuser': process.env.DB_DEV_USER,
       'dbname': process.env.DB_DEV_NAME,

@@ -1,4 +1,5 @@
 'use strict';
+const debug = require('debug')('psychoquiz:profiles');
 
 let req, res;
 let error = error => res.jsend.error(error);
@@ -117,9 +118,14 @@ const deleteProfileRoute = (rq, rs) => {
  */
 
 module.exports = function (app, router) {
-  router.get('/api/profiles', getProfilesRoute); // TODO: auth
-  router.post('/api/profiles', createProfileRoute); // TODO: auth
-  router.get('/api/profiles/:id', getProfileByIdRoute); // TODO: auth
-  router.put('/api/profiles/:id', updateProfileRoute); // TODO: auth
-  router.delete('/api/profiles/:id', deleteProfileRoute); // TODO: auth
+  if (app.config.adminEnabled) {
+    debug('Profiles admin API enabled');
+    router.get('/api/profiles', getProfilesRoute);
+    router.post('/api/profiles', createProfileRoute);
+    router.get('/api/profiles/:id', getProfileByIdRoute);
+    router.put('/api/profiles/:id', updateProfileRoute);
+    router.delete('/api/profiles/:id', deleteProfileRoute);
+  } else {
+    debug('Profiles admin API disabled');
+  }
 }

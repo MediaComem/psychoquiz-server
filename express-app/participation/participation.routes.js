@@ -1,6 +1,7 @@
 'use strict';
-let Promise = require('bluebird');
-let uuidBase62 = require('uuid-base62');
+const Promise = require('bluebird');
+const debug = require('debug')('psychoquiz:participations');
+const uuidBase62 = require('uuid-base62');
 
 
 let req, res;
@@ -301,10 +302,16 @@ let promiseFor = Promise.method(function (condition, action, value) {
 });
 
 module.exports = function (app, router) {
-    router.post('/api/participations', startGameRoute);
-    router.get('/api/participations', getAllParticipationsRoute); // TODO: Auth
-    router.get('/api/participations/:token', getParticipationRoute);
-    router.get('/api/share/:code', getResultsWithShareCodeRoute); // TODO: Remove ?
-    router.get('/api/participations/:token/results', getResultsRoute);
-    router.get('/api/participations/:token/share', getParticipationShareLinkRoute);
+  router.post('/api/participations', startGameRoute);
+  router.get('/api/participations/:token', getParticipationRoute);
+  router.get('/api/share/:code', getResultsWithShareCodeRoute); // TODO: Remove ?
+  router.get('/api/participations/:token/results', getResultsRoute);
+  router.get('/api/participations/:token/share', getParticipationShareLinkRoute);
+
+  if (app.config.adminEnabled) {
+    debug('Participations admin API enabled');
+    router.get('/api/participations', getAllParticipationsRoute);
+  } else {
+    debug('Participations admin API disabled');
+  }
 }

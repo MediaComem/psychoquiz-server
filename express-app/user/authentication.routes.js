@@ -1,6 +1,7 @@
 'use strict';
 
 const bcrypt = require('bcrypt');
+const debug = require('debug')('psychoquiz:auth');
 const jsonwebtoken = require('jsonwebtoken');
 
 let req, res;
@@ -97,7 +98,13 @@ const loginRoute = (rq, rs) => {
 
 
 module.exports = function (app, router) {
-    router.post('/api/auth/login', loginRoute);
+  router.post('/api/auth/login', loginRoute);
+  //router.get('/api/auth/user', checkUserRoute);
+
+  if (app.config.adminEnabled) {
+    debug('Registration API enabled');
     router.post('/api/auth/register', registerRoute); // TODO: Auth
-   //router.get('/api/auth/user', checkUserRoute);
+  } else {
+    debug('Registration API disabled');
+  }
 }

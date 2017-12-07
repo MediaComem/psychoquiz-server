@@ -1,4 +1,5 @@
 'use strict';
+const debug = require('debug')('psychoquiz:chapters');
 
 let req, res;
 let error = error => res.jsend.error(error);
@@ -187,9 +188,15 @@ const getRandomChapterRoute = (rq, rs) => {
 
 module.exports = function (app, router) {
   router.get('/api/chapters', getChaptersRoute);
-  router.post('/api/chapters', createChapterRoute);
   router.get('/api/chapters/random', getRandomChapterRoute);
   router.get('/api/chapters/:id', getChapterByIdRoute);
-  router.put('/api/chapters/:id', updateChapterRoute); // TODO: auth
-  router.delete('/api/chapters/:id', deleteChapterRoute); // TODO: auth
+
+  if (app.config.adminEnabled) {
+    debug('Chapters admin API enabled');
+    router.post('/api/chapters', createChapterRoute);
+    router.put('/api/chapters/:id', updateChapterRoute);
+    router.delete('/api/chapters/:id', deleteChapterRoute);
+  } else {
+    debug('Chapters admin API disabled');
+  }
 }
