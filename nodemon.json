@@ -1,0 +1,13 @@
+{
+  "ext": "js",
+  "ignore": [
+    ".git",
+    "local",
+    "node_modules"
+  ],
+  "watch": [
+    "app.js",
+    "config/**/*.js",
+    "express-app/**/*.js"
+  ]
+}
