@@ -1,7 +1,7 @@
 'use strict';
 
 function getConfig(req, res) {
-  res.send({
+  res.jsend.success({
     adminEnabled: req.app.config.adminEnabled,
     version: require('../../package').version
   });
